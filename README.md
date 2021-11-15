@@ -1,4 +1,4 @@
-# Description
+# RadioHead IoT
 
 IoT style configuration of Arduino modules using the RadioHead library(1.84)
 
@@ -41,6 +41,8 @@ data: the data thats associated with the sel and r/w. DataType changes according
 |               |        | 1          |                                                                                             | local device sends presence when setting changes  |         |
 
 
+The select can go up to 256.
+
 ### changing sel assignments
 
 The sel can be changed according to your use case by going into the header file and changing the sel assignment in the struct declaration.
@@ -51,9 +53,9 @@ include this for all timekeeping related function.
 main file (.ino) will need to declare:
 
 ```
-#include "timekeeper.h"
+<span style="color:orange"#include</span> "timekeeper.h"
 RH_ASK rf_driver;
-uint8_t name_of_timekeeper[6];
+<span style="color:blue"uint8_t</span> name_of_timekeeper[6];
 ```
 
 where name_of_timekeeper = {second,minute,hour,weekday,day,month}.
