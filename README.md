@@ -4,9 +4,9 @@ IoT style configuration of Arduino modules using the RadioHead library(1.84)
 
 Tested using 433MHz ASK tx/rx modules paired with Arduino Uno & Nano
 
-Requires the RadioHead library (1.84 was used)
+Requires the RadioHead library (1.84 was used). These are provided in /packages
 
-Move RadioHead_IoT folder to your Arduino program libraries (~Arduino/libraries) and restart the IDE.
+Install RadioHead_IoT by using the IDE and 'Install from .zip' under tools.
 
 ## Lookup Table
 
@@ -53,24 +53,24 @@ include this for all timekeeping related function.
 main file (.ino) will need to declare:
 
 ```
-<span style="color:orange">#include</span> "timekeeper.h"
+#include "timekeeper.h"
 RH_ASK rf_driver;
-<span style="color:blue">uint8_t</span> name_of_timekeeper[6];
+uint8_t current_day_time[6];
 ```
 
-where name_of_timekeeper = {second,minute,hour,weekday,day,month}.
+where current_day_time = {second,minute,hour,weekday,day,month}.
 
 In the main loop, add this line to keep the time ticking on the device:
 
-```update_clock(name_of_timekeeper);```
+```update_clock(current_day_time);```
 
-This will me saved to the array name_of_timekeeper.
+This will me saved to the array current_day_time.
 
 ### transmitting
 
 To transmit the local time, add this line anywhere you wish to send the local time over RF:
 
-```transmit_clock(&rf_driver,name_of_timekeeper);```
+```transmit_clock(&rf_driver,current_day_time);```
 
 ### Recieving
 
