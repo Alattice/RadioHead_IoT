@@ -53,9 +53,9 @@ include this for all timekeeping related function.
 main file (.ino) will need to declare:
 
 ```
-<span style="color:orange"#include</span> "timekeeper.h"
+<span style="color:orange">#include</span> "timekeeper.h"
 RH_ASK rf_driver;
-<span style="color:blue"uint8_t</span> name_of_timekeeper[6];
+<span style="color:blue">uint8_t</span> name_of_timekeeper[6];
 ```
 
 where name_of_timekeeper = {second,minute,hour,weekday,day,month}.
