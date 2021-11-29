@@ -10,6 +10,14 @@ Install RadioHead_IoT by using the IDE and 'Install from .zip' under tools.
 
 By default RadioHead uses digital pin 11 for rx and digital pin 12 for tx.
 
+# Dependencies
+
+```
+RadioHead
+```
+
+Dependencies are provided in /packages.
+
 ## Lookup Table
 
 There is a lookup.xlsx excel file containing the id for each command. packets are sent as a struct containing sel,r/w,data.
@@ -32,11 +40,23 @@ data: the data thats associated with the sel and r/w. DataType changes according
 |               | 5      | 0          |                                                                                             |                                                   |         |
 |               |        | 1          |                                                                                             |                                                   |         |
 
-The select can go up to 256.
+The select can go up to 256. 
 
-### changing sel assignments
+All this can be changed by adjusting each struct in the header files (in case you want to remove some functions you wont need)
 
-The sel can be changed according to your use case by going into the header file and changing the sel assignment in the struct declaration.
+### Changing select assignments
+
+The sel can be changed according to your use case by going into the header file and changing the sel assignment in the struct declaration. 
+
+Below is an example from timekeeper.h
+
+```
+struct clocker{
+  const uint8_t sel = 1; //<--change this to your liking
+  bool w; //0 - read; 1 - write 
+  uint8_t time_date[6];
+};
+```
 
 ## timekeeper.h
 
@@ -55,9 +75,9 @@ In the main loop, add this line to keep the time ticking on the device:
 
 ```update_clock(&current_time);```
 
-This will me saved to the array current_day_time.
+This will be saved to the time_date[6] array of the current_time struct.
 
-### transmitting
+### Transmitting
 
 To transmit the local time, add this line anywhere you wish to send the local time over RF:
 
@@ -72,17 +92,17 @@ The ```current_time.w = true;``` can be called whenever, and next time the code 
 To recieve the time from other modules, the local device needs to listen to the RadioHead buffer for data.
 
 ```
-	uint8_t buf[RH_ASK_MAX_MESSAGE_LEN];// Set buffer to size of expected message
-    uint8_t buflen = sizeof(buf);
+uint8_t buf[RH_ASK_MAX_MESSAGE_LEN];// Set buffer to size of expected message
+uint8_t buflen = sizeof(buf);
 
-    if (rf_driver.recv((uint8_t*)buf, &buflen)){
+if (rf_driver.recv((uint8_t*)buf, &buflen)){
 ```
 
 then the sel and w of the recieved data must be determined to figure out how to work with the data
 
 ```
-	  head header;
-      memcpy(&header,buf,2);
+head header;
+memcpy(&header,buf,2);
 ```
 
 Optionally, you can also read ```buf[0]``` and ```buf[1]``` for sel and w respectively.
@@ -90,10 +110,12 @@ Optionally, you can also read ```buf[0]``` and ```buf[1]``` for sel and w respec
 Then a large if statements are made for every packet the local device needs (in this case, timekeeper):
 
 ```
-	  if(header.sel == current_time.sel){
-        recieve_clock(&current_time,buf,8);// 8 is for 1 byte of each entry (sel,w,time_date[6])
-      }
+if(header.sel == current_time.sel){
+	recieve_clock(&current_time,buf,8);// 8 is for 1 byte of each entry (sel,w,time_date[6])
+}
 ```
 
 ## Additional Resources
-https://en.cppreference.com/w/cpp/preprocessor/conditional
+- https://en.cppreference.com/w/cpp/preprocessor/conditional
+
+- https://www.airspayce.com/mikem/arduino/RadioHead/classRH__ASK.html
