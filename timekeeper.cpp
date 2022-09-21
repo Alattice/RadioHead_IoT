@@ -11,11 +11,24 @@
  *           0[0-59] 1[0-59] 2[0-23] 3[1-7]  4[1-29/30/31] 5[1-12]
  */
 #include "timekeeper.h"
-//#include <stdint.h>
 #include <Arduino.h>
 
+void transmit_clock(RH_ASK *rf_driver,clocker *command){
+  if(command->w){
+    rf_driver->send((uint8_t *)command, sizeof(*command));
+    rf_driver->waitPacketSent();
+    command->w = false;
+  }
+}
 
-
+uint8_t recieve_clock(clocker *curr_time,uint8_t (*buf),uint8_t buflen){
+  if(buf[1]){//if write == true, save time
+    memcpy(curr_time,buf,buflen);
+    curr_time->w = 0;
+  }else if(!buf[1]){//if write == false, read local time and prep to send; only used for master timekeeper
+    curr_time->w = 1;
+  }
+}
 
 void update_clock(clocker *time_k){
   static uint32_t curr_ms, prev_ms = millis();
@@ -57,22 +70,5 @@ void update_clock(clocker *time_k){
   if(time_k->time_date[5]==13){//reset year
      time_k->time_date[5]=1;
     //curr_time[6]++;
-  }
-}
-
-void transmit_clock(RH_ASK *rf_driver,clocker *command){
-  if(command->w){
-    rf_driver->send((uint8_t *)command, sizeof(*command));
-    rf_driver->waitPacketSent();
-    command->w = 0;
-  }
-}
-
-uint8_t recieve_clock(clocker *curr_time,uint8_t (*buf),uint8_t buflen){
-  if(buf[1]){//if write == true, save time
-    memcpy(curr_time,buf,buflen);
-    curr_time->w = 0;
-  }else if(!buf[1]){//if write == false, read local time and prep to send; only used for master timekeeper
-    curr_time->w = 1;
   }
 }
