@@ -51,10 +51,10 @@ The sel can be changed according to your use case by going into the header file 
 Below is an example from timekeeper.h
 
 ```
-struct clocker{
+struct header{
   const uint8_t sel = 1; //<--change this to your liking
   bool w; //0 - read; 1 - write 
-  uint8_t time_date[6];
+  dt content;
 };
 ```
 
@@ -66,7 +66,7 @@ your main file (.ino) will need to declare:
 ```
 #include "timekeeper.h"
 RH_ASK rf_driver;
-clocker current_time;
+local_time current_time;
 ```
 
 where current_day_time = {second,minute,hour,weekday,day,month}.

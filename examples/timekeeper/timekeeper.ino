@@ -17,27 +17,27 @@
  * passing pointer in func: https://stackoverflow.com/questions/41930685/passing-pointer-from-function-to-function
  */
 //include timekeeping module
+#include <RH_ASK.h>
 #include "timekeeper.h"
-//#include <SPI.h>
-// Create Amplitude Shift Keying Object
-RH_ASK rf_driver;
-/* #define RXPIN 11;
- * #define TXPIN 12;
- *RH_ASK rf_driver(2000,RXPIN,TXPIN);
- */
 
+#define RF_TX_PIN 12
+#define RF_RX_PIN 11
+// Create Amplitude Shift Keying Object
+RH_ASK rf_driver(2000,RF_RX_PIN,RF_TX_PIN);
+local_time timek;
+local_time::header curr_time;
 //local device transmit or reciever?
-bool transmitter = 0;//1==transmitter; 0==reciever
+bool transmitter = 1;//1==transmitter; 0==reciever
 
 //create structs that will be used (found in coresponding header files)
-struct clocker curr_time;
+
 struct head{
   uint8_t sel;
   bool w;
 };
 
 //time keeper
-uint8_t track_sec = curr_time.time_date[0];//used to differenciate time and send RF every second
+uint8_t track_sec = curr_time.content.sec;//used to differenciate time and send RF every second
 
 void setup()
 {
@@ -46,26 +46,21 @@ void setup()
     Serial.begin(9600);
 
     //optionally pre-assign time values
-    curr_time.time_date[0] = 13;//sec
-    curr_time.time_date[1] = 53;//min
-    curr_time.time_date[2] = 21;//hour
-    curr_time.time_date[3] = 7; //weekday
-    curr_time.time_date[4] = 14;//day
-    curr_time.time_date[5] = 11;//month
+
 }
 
 void loop()
 {
   //ROUTINES
-  update_clock(&curr_time);//keep clock ticking
+  timek.update(curr_time);//keep clock ticking
   
   if(transmitter){
     //RADIOHEAD TRANSMIT
-    if(curr_time.time_date[0] != track_sec){//transmit every interval
-      track_sec = curr_time.time_date[0];
+    if(curr_time.content.sec != track_sec){//transmit every interval
+      track_sec = curr_time.content.sec;
       serial_time();
       curr_time.w = 1;//set write to true, thus sending next time it runs transmit_clock()
-      transmit_clock(&rf_driver,&curr_time);//will only transmit when curr_time.w == 1;
+      timek.send(&rf_driver,&curr_time);//will only transmit when curr_time.w == 1;
     }
   }else{
     //RADIOHEAD RECIEVER
@@ -82,11 +77,11 @@ void loop()
       Serial.println(header.w);
       //act based on select and read/write
       if(header.sel == curr_time.sel){
-        recieve_clock(&curr_time,buf,8);
+        timek.recv(&curr_time,buf,8);
       }
     }
-    if(curr_time.time_date[0] != track_sec){//displays time at 1 sec intervals
-       track_sec = curr_time.time_date[0];
+    if(curr_time.content.sec != track_sec){//displays time at 1 sec intervals
+       track_sec = curr_time.content.sec;
        serial_time();
     }
   }
@@ -94,13 +89,13 @@ void loop()
 
 //print the date &time to console
 void serial_time(){
-  Serial.print(curr_time.time_date[2]);
+  Serial.print(curr_time.content.hour);
   Serial.print(":");
-  Serial.print(curr_time.time_date[1]);
+  Serial.print(curr_time.content.min);
   Serial.print(".");
-  Serial.print(curr_time.time_date[0]);
+  Serial.print(curr_time.content.sec);
   Serial.print("\t");
-  switch(curr_time.time_date[3]){
+  switch(curr_time.content.weekday){
     case 1:{  Serial.print("Monday");    }break;
     case 2:{  Serial.print("Tueday");    }break;
     case 3:{  Serial.print("Wednesday"); }break;
@@ -110,7 +105,7 @@ void serial_time(){
     case 7:{  Serial.print("Sunday");    }break;
   }
   Serial.print("\t");
-  switch(curr_time.time_date[5]){
+  switch(curr_time.content.month){
     case 1:{  Serial.print("Jan"); }break;
     case 2:{  Serial.print("Feb"); }break;
     case 3:{  Serial.print("Mar"); }break;
@@ -125,5 +120,5 @@ void serial_time(){
     case 12:{ Serial.print("Dec"); }break;
   }
   Serial.print("\t");
-  Serial.println(curr_time.time_date[4]);
+  Serial.println(curr_time.content.year);
 }
