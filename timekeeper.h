@@ -8,7 +8,12 @@
 
 class local_time{
   //private:
-    struct dt{
+
+  public:
+    local_time();
+    struct header{
+      const uint8_t sel PROGMEM = 1;
+      bool w;
       uint8_t sec;
       uint8_t min;
       uint8_t hour;
@@ -17,13 +22,6 @@ class local_time{
       uint8_t  month;
       uint16_t year;
       bool     leap;
-    };
-  public:
-    local_time();
-    struct header{
-      const uint8_t sel PROGMEM = 1;
-      bool w;
-      dt content;
     };
 
    //call func to transmit clock data to RadioHead

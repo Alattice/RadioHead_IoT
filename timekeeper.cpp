@@ -52,31 +52,31 @@ void local_time::update(header& time_k){
   if(curr_ms < prev_ms){prev_ms = 0;}
   if(curr_ms >= (prev_ms+1000)){
     prev_ms=curr_ms;
-    time_k.content.sec++; 
+    time_k.sec++; 
     //reset seconds, minutes, hour, day?, month?
-    if(time_k.content.sec == 60){
-      time_k.content.sec = 0;
-      time_k.content.min++;
-      if(time_k.content.min == 60){
-        time_k.content.min = 0;
-        time_k.content.hour++;
-        if(time_k.content.hour == 24){
-          time_k.content.hour = 0;//hour
-          time_k.content.weekday++;//weekday
-          time_k.content.yearday++;//day
-          if(time_k.content.weekday == 8){
-            time_k.content.weekday = 1;//weekday
+    if(time_k.sec == 60){
+      time_k.sec = 0;
+      time_k.min++;
+      if(time_k.min == 60){
+        time_k.min = 0;
+        time_k.hour++;
+        if(time_k.hour == 24){
+          time_k.hour = 0;//hour
+          time_k.weekday++;//weekday
+          time_k.yearday++;//day
+          if(time_k.weekday == 8){
+            time_k.weekday = 1;//weekday
           }//weekday
           uint8_t mo_sum;
           const uint8_t cal[] = {31,28,31,30,31,30,31,31,30,31,30,31};
-          for(int a = 0; a < time_k.content.month; a++){
+          for(int a = 0; a < time_k.month; a++){
             mo_sum += cal[a];
-            if(time_k.content.yearday < mo_sum){
-              time_k.content.month = a+1;
+            if(time_k.yearday < mo_sum){
+              time_k.month = a+1;
               if(a == 12){ 
-                time_k.content.month = 1;
-                time_k.content.yearday = 1;//day
-                time_k.content.year++;
+                time_k.month = 1;
+                time_k.yearday = 1;//day
+                time_k.year++;
               }
             }//mo>yr
           }//for mo

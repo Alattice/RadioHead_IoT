@@ -17,7 +17,7 @@
  * passing pointer in func: https://stackoverflow.com/questions/41930685/passing-pointer-from-function-to-function
  */
 //include timekeeping module
-#include <RH_ASK.h>
+//#include <RH_ASK.h>
 #include "timekeeper.h"
 
 #define RF_TX_PIN 12
@@ -27,7 +27,7 @@ RH_ASK rf_driver(2000,RF_RX_PIN,RF_TX_PIN);
 local_time timek;
 local_time::header curr_time;
 //local device transmit or reciever?
-bool transmitter = 1;//1==transmitter; 0==reciever
+bool transmitter = 0;//1==transmitter; 0==reciever
 
 //create structs that will be used (found in coresponding header files)
 
@@ -37,7 +37,7 @@ struct head{
 };
 
 //time keeper
-uint8_t track_sec = curr_time.content.sec;//used to differenciate time and send RF every second
+uint8_t track_sec = curr_time.sec;//used to differenciate time and send RF every second
 
 void setup()
 {
@@ -56,8 +56,8 @@ void loop()
   
   if(transmitter){
     //RADIOHEAD TRANSMIT
-    if(curr_time.content.sec != track_sec){//transmit every interval
-      track_sec = curr_time.content.sec;
+    if(curr_time.sec != track_sec){//transmit every interval
+      track_sec = curr_time.sec;
       serial_time();
       curr_time.w = 1;//set write to true, thus sending next time it runs transmit_clock()
       timek.send(&rf_driver,&curr_time);//will only transmit when curr_time.w == 1;
@@ -80,8 +80,8 @@ void loop()
         timek.recv(&curr_time,buf,8);
       }
     }
-    if(curr_time.content.sec != track_sec){//displays time at 1 sec intervals
-       track_sec = curr_time.content.sec;
+    if(curr_time.sec != track_sec){//displays time at 1 sec intervals
+       track_sec = curr_time.sec;
        serial_time();
     }
   }
@@ -89,13 +89,13 @@ void loop()
 
 //print the date &time to console
 void serial_time(){
-  Serial.print(curr_time.content.hour);
+  Serial.print(curr_time.hour);
   Serial.print(":");
-  Serial.print(curr_time.content.min);
+  Serial.print(curr_time.min);
   Serial.print(".");
-  Serial.print(curr_time.content.sec);
+  Serial.print(curr_time.sec);
   Serial.print("\t");
-  switch(curr_time.content.weekday){
+  switch(curr_time.weekday){
     case 1:{  Serial.print("Monday");    }break;
     case 2:{  Serial.print("Tueday");    }break;
     case 3:{  Serial.print("Wednesday"); }break;
@@ -105,7 +105,7 @@ void serial_time(){
     case 7:{  Serial.print("Sunday");    }break;
   }
   Serial.print("\t");
-  switch(curr_time.content.month){
+  switch(curr_time.month){
     case 1:{  Serial.print("Jan"); }break;
     case 2:{  Serial.print("Feb"); }break;
     case 3:{  Serial.print("Mar"); }break;
@@ -120,5 +120,5 @@ void serial_time(){
     case 12:{ Serial.print("Dec"); }break;
   }
   Serial.print("\t");
-  Serial.println(curr_time.content.year);
+  Serial.println(curr_time.year);
 }
