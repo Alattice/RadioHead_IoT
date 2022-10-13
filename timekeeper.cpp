@@ -26,7 +26,7 @@ local_time::local_time(){
 //      this->month   = month;
 //    };
 
-void local_time::send(RH_ASK *rf_driver,header *command){
+void local_time::send(RH_ASK *rf_driver,packet *command){
   if(command->w){
     rf_driver->send((uint8_t *) command, sizeof(*command));
     rf_driver->waitPacketSent();
@@ -34,7 +34,7 @@ void local_time::send(RH_ASK *rf_driver,header *command){
   }
 }
 
-void local_time::recv(header* curr_time,uint8_t (*buf),uint8_t buflen){
+void local_time::recv(packet* curr_time,uint8_t (*buf),uint8_t buflen){
   if(buf[1]){//if write == true, save time
     memcpy(curr_time,buf,buflen);
     curr_time->w = 0;
@@ -43,7 +43,7 @@ void local_time::recv(header* curr_time,uint8_t (*buf),uint8_t buflen){
   }
 }
 
-void local_time::update(header& time_k){
+void local_time::update(packet& time_k){
   static uint32_t curr_ms, prev_ms = millis();
 
   //update millis and seconds

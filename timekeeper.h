@@ -11,7 +11,7 @@ class local_time{
 
   public:
     local_time();
-    struct header{
+    struct packet{
       const uint8_t sel PROGMEM = 1;
       bool w;
       uint8_t sec;
@@ -25,12 +25,12 @@ class local_time{
     };
 
    //call func to transmit clock data to RadioHead
-    void send(RH_ASK*, header*);
+    void send(RH_ASK*, packet*);
 
    //call to update local time from RadioHead recieved time
-    void recv(header*,uint8_t*,uint8_t);
+    void recv(packet*,uint8_t*,uint8_t);
   
    //call func to keep local time up-to-date
-    void update(header&);
+    void update(packet&);
 };
 #endif

@@ -25,9 +25,9 @@
 // Create Amplitude Shift Keying Object
 RH_ASK rf_driver(2000,RF_RX_PIN,RF_TX_PIN);
 local_time timek;
-local_time::header curr_time;
+local_time::packet curr_time;
 //local device transmit or reciever?
-bool transmitter = 0;//1==transmitter; 0==reciever
+bool transmitter = 1;//1==transmitter; 0==reciever
 
 //create structs that will be used (found in coresponding header files)
 
