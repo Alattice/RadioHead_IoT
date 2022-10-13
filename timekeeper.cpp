@@ -17,14 +17,6 @@ local_time::local_time(){
   //check valid init values
 
 }
-//    void local_time::set_time(uint8_t sec = 0, uint8_t min = 0, uint8_t hour = 0, uint8_t weekday = 1, uint8_t day = 1, uint8_t month = 1){
-//      this->sec     = sec;
-//      this->min     = min;
-//      this->hour    = hour;
-//      this->weekday = weekday;
-//      this->day     = day;
-//      this->month   = month;
-//    };
 
 void local_time::send(RH_ASK *rf_driver,packet *command){
   if(command->w){
@@ -68,7 +60,7 @@ void local_time::update(packet& time_k){
             time_k.weekday = 1;//weekday
           }//weekday
           uint8_t mo_sum;
-          const uint8_t cal[] = {31,28,31,30,31,30,31,31,30,31,30,31};
+          uint8_t cal[] = {31,time_k.leap,31,30,31,30,31,31,30,31,30,31};
           for(int a = 0; a < time_k.month; a++){
             mo_sum += cal[a];
             if(time_k.yearday < mo_sum){
@@ -77,10 +69,15 @@ void local_time::update(packet& time_k){
                 time_k.month = 1;
                 time_k.yearday = 1;//day
                 time_k.year++;
-              }
+                if(time_k.year%4==0){
+                  time_k.leap = 29;
+                }else{
+                  time_k.leap = 28;
+                }//leap year
+              }//yr++
             }//mo>yr
-          }//for mo
-        }//hour>weekday
+          }//for loop mo
+        }//hour>weekday & dayofyear
       }//min>hour
     }//sec>min
   }//ms>sec

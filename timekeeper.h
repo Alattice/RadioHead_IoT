@@ -14,14 +14,14 @@ class local_time{
     struct packet{
       const uint8_t sel PROGMEM = 1;
       bool w;
-      uint8_t sec;
-      uint8_t min;
-      uint8_t hour;
-      uint8_t weekday;
-      uint8_t yearday;
-      uint8_t  month;
-      uint16_t year;
-      bool     leap;
+      uint8_t sec = 45;
+      uint8_t min = 59;
+      uint8_t hour = 23;
+      uint8_t weekday = 1;
+      uint8_t yearday = 1;
+      uint8_t  month = 1;
+      uint16_t year = 2020;
+      uint8_t  leap = 28;
     };
 
    //call func to transmit clock data to RadioHead
