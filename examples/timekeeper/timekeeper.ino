@@ -19,11 +19,20 @@
 //include timekeeping module
 //#include <RH_ASK.h>
 #include "timekeeper.h"
+#include <RTClib.h>
 
 #define RF_TX_PIN 12
 #define RF_RX_PIN 11
+
 // Create Amplitude Shift Keying Object
 RH_ASK rf_driver(2000,RF_RX_PIN,RF_TX_PIN);
+
+//   DS1302 rtc(ce_pin, sck_pin, io_pin);
+// ce_pin  (RST): default 4
+// sck_pin (CLK): default 5
+// io_pin  (DAT): default 6
+DS1302 rtc;
+
 local_time timek;
 local_time::packet curr_time;
 //local device transmit or reciever?
@@ -38,11 +47,14 @@ struct head{
 
 //time keeper
 uint8_t track_sec = curr_time.sec;//used to differenciate time and send RF every second
+uint8_t track_day = curr_time.min;
 
 void setup()
 {
+    rtc.begin();
     //Initialize ASK Object
     rf_driver.init();
+    //rtc.adjust(DateTime(__DATE__, __TIME__));
     Serial.begin(9600);
 
     //optionally pre-assign time values
@@ -53,38 +65,33 @@ void loop()
 {
   //ROUTINES
   timek.update(curr_time);//keep clock ticking
-  
-  if(transmitter){
-    //RADIOHEAD TRANSMIT
-    if(curr_time.sec != track_sec){//transmit every interval
+  if(track_day != curr_time.min){
+    resync();
+  }
+
+  //RADIOHEAD TRANSMIT
+  if(curr_time.sec != track_sec){//transmit every interval
+    track_sec = curr_time.sec;
+    serial_time();
+    curr_time.w = 1;//set write to true, thus sending next time it runs transmit_clock()
+    timek.send(&rf_driver,&curr_time);//will only transmit when curr_time.w == 1;
+  }
+
+  if(curr_time.sec != track_sec){//displays time at 1 sec intervals
       track_sec = curr_time.sec;
       serial_time();
-      curr_time.w = 1;//set write to true, thus sending next time it runs transmit_clock()
-      timek.send(&rf_driver,&curr_time);//will only transmit when curr_time.w == 1;
-    }
-  }else{
-    //RADIOHEAD RECIEVER
-    uint8_t buf[RH_ASK_MAX_MESSAGE_LEN];// Set buffer to size of expected message
-    uint8_t buflen = sizeof(buf);
-    //check for any messages 
-    if (rf_driver.recv((uint8_t*)buf, &buflen)){
-      //init header and determine sel
-      head header;
-      memcpy(&header,buf,2);
-      Serial.print("rcv ");
-      Serial.print(header.sel);
-      Serial.print(" , ");
-      Serial.println(header.w);
-      //act based on select and read/write
-      if(header.sel == curr_time.sel){
-        timek.recv(&curr_time,buf,8);
-      }
-    }
-    if(curr_time.sec != track_sec){//displays time at 1 sec intervals
-       track_sec = curr_time.sec;
-       serial_time();
-    }
   }
+  
+}
+
+void resync(){
+    DateTime now = rtc.now();
+    curr_time.year  = now.year();
+    curr_time.month = now.month();
+    curr_time.weekday   = now.dayOfWeek();
+    curr_time.hour  = now.hour();
+    curr_time.min = now.minute();
+    curr_time.sec = now.second();
 }
 
 //print the date &time to console
