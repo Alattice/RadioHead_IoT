@@ -47,7 +47,7 @@ struct head{
 
 //time keeper
 uint8_t track_sec = curr_time.sec;//used to differenciate time and send RF every second
-uint8_t track_day = curr_time.min;
+uint8_t track_day = curr_time.weekday;
 
 void setup()
 {
@@ -65,7 +65,7 @@ void loop()
 {
   //ROUTINES
   timek.update(curr_time);//keep clock ticking
-  if(track_day != curr_time.min){
+  if(track_day != curr_time.weekday){
     resync();
   }
 
